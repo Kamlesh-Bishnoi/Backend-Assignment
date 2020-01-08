@@ -56,7 +56,7 @@ exports.sendUserDetails = async (req, res) => {
 exports.verifyDetail = async (req, res) => {
   if (req.body.username && req.body.email && req.body.password) {
     try {
-      let findUserDetail = await Detail.findOne({ email: req.body.email });
+      let findUserDetail = await Detail.findOne({ email: req.body.email, isActive: true });
       let verifyToken= await sendToken(findUserDetail);
       console.log("verifyToken is",verifyToken)
       console.log("findUser detail", findUserDetail);
