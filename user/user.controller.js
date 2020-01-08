@@ -9,13 +9,11 @@ exports.sendUserDetails = async (req, res) => {
   if (req.body) {
     try {
       let newDetail = await Detail.findOne({ email: req.body.email });
-      console.log(newDetail)
       if (newDetail) {
         return res.json({ success: true, message: " User already exists" })
       }
       else {
         let hashedPassword = await bcrypt.hash(req.body.password, saltRounds);
-        console.log("password after hashing ", hashedPassword);
         req.body.password = hashedPassword;
         let details = new Detail(req.body);
         
@@ -26,7 +24,6 @@ exports.sendUserDetails = async (req, res) => {
           console.error(error);
         }
         details.emailToken=emailToken;
-        console.log("details are ", emailToken, details)
         let Userdoc = await details.save();
           
         if (true) {
@@ -59,16 +56,13 @@ exports.sendUserDetails = async (req, res) => {
 exports.verifyDetail = async (req, res) => {
   if (req.body.username && req.body.email && req.body.password) {
     try {
-      let findUserDetail = await Detail.findOne({ email: req.body.email, isActive: true });
-      let verifyToken= await sendToken(findUserDetail);
-      console.log("verifyToken is",verifyToken)
-      console.log("findUser detail", findUserDetail);
+      let findUserDetail = await Detail.findOne({ email: req.body.email });
       if (findUserDetail) {
+        let verifyToken= await sendToken(findUserDetail);
         let comparedPassword = await bcrypt.compare(
           req.body.password,
           findUserDetail.password
         );
-        console.log("comapre password status", comparedPassword);
         if (comparedPassword) {
           findUserDetail.token = verifyToken;
           await findUserDetail.save();
@@ -108,11 +102,10 @@ exports.verifyDetail = async (req, res) => {
 exports.VerifyToken = (req, res) => {
   if(req.body.token){
   jwt.verify(req.body.token, 'AssignmentFirst', async function (err, decoded) {
-    console.log("decode details is", decoded)
     if (err) {
-      return res.json({ success: false, message: "Incorrect token" })
+      return res.json({ success: false, message: "Incorrect  token" })
     }
-    let verifyToken = await Detail.findOne({ _id: decoded._id, token: req.body.token })
+    let verifyToken = await Detail.findOne({_id:decoded._id })
     if (verifyToken) {
       return res.json({ success: true, message: "token verified" })
     }
@@ -129,7 +122,6 @@ exports.VerifyToken = (req, res) => {
 exports.verificationEmail = async (req, res) => {
   if (req.params.emailToken) {
     let findUserDetail = await Detail.findOne({ emailToken:req.params.emailToken })
-    console.log("finduserdetail hhhhhhh",findUserDetail)
     if (findUserDetail) {
       findUserDetail.isActive=true;
       await findUserDetail.save();
@@ -172,7 +164,6 @@ async function sendEmail(msg) {
 async function sendToken(findUserDetail){
   let token = await jwt.sign({ _id: findUserDetail._id }, "AssignmentFirst", {
     algorithm: "HS256", expiresIn: '1h' });
-  console.log( "token is ",token);
    await Detail.findByIdAndUpdate(
     findUserDetail._id,
     { $set: { token: token } },
