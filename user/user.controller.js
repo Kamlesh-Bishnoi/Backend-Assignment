@@ -3,6 +3,8 @@ const bcrypt = require("bcrypt");
 const saltRounds = 5;
 var jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
+ 
+// User exists or Not(Signup) 
 exports.sendUserDetails = async (req, res) => {
   if (req.body) {
     try {
@@ -53,6 +55,7 @@ exports.sendUserDetails = async (req, res) => {
   }
 }
 
+// Login
 exports.verifyDetail = async (req, res) => {
   if (req.body.username && req.body.email && req.body.password) {
     try {
@@ -101,6 +104,7 @@ exports.verifyDetail = async (req, res) => {
   }
 };
 
+// VerifyToken
 exports.VerifyToken = (req, res) => {
   if(req.body.token){
   jwt.verify(req.body.token, 'AssignmentFirst', async function (err, decoded) {
@@ -121,6 +125,7 @@ exports.VerifyToken = (req, res) => {
   }
 }
 
+// Verifyemail
 exports.verificationEmail = async (req, res) => {
   if (req.params.emailToken) {
     let findUserDetail = await Detail.findOne({ emailToken:req.params.emailToken })
@@ -148,6 +153,7 @@ async function sendEmail(msg) {
       pass: "amanbishnoi1234567890029" // generated ethereal password
     }
   });
+  
   // send mail with defined transport object
   try {
     let info = await transporter.sendMail({
